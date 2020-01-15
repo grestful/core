@@ -15,6 +15,13 @@ import (
 
 var gGore *Core
 var configOne sync.Once
+var contextPool *sync.Pool
+
+func GetContext(g *gin.Context) *Context {
+	c := contextPool.Get().(*Context)
+	c.Context = g
+	return c
+}
 
 func init() {
 	gGore = &Core{
@@ -24,6 +31,9 @@ func init() {
 		Db:     make(map[string]*gorm.DB),
 		Redis:  make(map[string]*redis.Client),
 	}
+	contextPool = &sync.Pool{New: func() interface{} {
+		return &Context{}
+	}}
 }
 
 func InitConfig(path string) {

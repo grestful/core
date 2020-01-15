@@ -27,7 +27,8 @@ type Controller struct {
 	ProcessFun ProcessFunc
 }
 
-func RunProcess(process IController, c *Context) {
+func RunProcess(process IController, g *gin.Context) {
+	c := GetContext(g)
 	process.SetContext(c)
 	var ierr IError
 	defer func() {
