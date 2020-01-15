@@ -42,3 +42,9 @@ type ICache interface {
 
 	Command(args... string) error
 }
+
+type IModel interface {
+	GetBytes() []byte
+	GetString() string
+	GetName() string
+}
