@@ -136,8 +136,13 @@ func (process *Controller) SetTrackId(id string) {
 	process.TrackId = id
 }
 
-func (process *Controller) setContext(c *Context) {
+func (process *Controller) SetContext(c *Context) {
 	if process.Ctx == nil {
 		process.Ctx = c
 	}
 }
+
+func (process *Controller) GetContext() *Context {
+	return process.Ctx
+}
+
