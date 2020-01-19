@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/grestful/session"
 	"github.com/grestful/utils"
 	"net/http"
 )
@@ -12,13 +11,13 @@ import (
 type Context struct {
 	*gin.Context
 	TrackId string //访问id
-	Session session.IUserSession
+	Session IUserSession
 }
 
 type ProcessFunc func(process *Controller) IError
 type Controller struct {
 	TrackId    string //访问id
-	Session    session.IUserSession
+	Session    IUserSession
 	Ctx        *Context
 	Code       string
 	error      IError
