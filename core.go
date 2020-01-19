@@ -44,34 +44,33 @@ func (gG *Core) Handle(httpMethod, relativePath string, handlers ...gin.HandlerF
 //}
 
 func (gG *Core) GetDefaultDb() *gorm.DB {
-	if db,ok := gG.Db["default"]; ok {
+	if db, ok := gG.Db["default"]; ok {
 		return db
 	}
 	return nil
 }
 
 func (gG *Core) GetDb(name string) *gorm.DB {
-	if db,ok := gG.Db[name]; ok {
+	if db, ok := gG.Db[name]; ok {
 		return db
 	}
 
-	panic(name +" db not exists")
+	panic(name + " db not exists")
 }
 
-
 func (gG *Core) GetDefaultRedis() *redis.Client {
-	if c,ok := gG.Redis["redis"]; ok {
+	if c, ok := gG.Redis["redis"]; ok {
 		return c
 	}
 	return nil
 }
 
 func (gG *Core) GetRedis(name string) *gorm.DB {
-	if db,ok := gG.Db[name]; ok {
+	if db, ok := gG.Db[name]; ok {
 		return db
 	}
 
-	panic(name +" db not exists")
+	panic(name + " db not exists")
 }
 
 func (gG *Core) SetLoggerFormat(format log.Formatter) {

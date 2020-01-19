@@ -24,6 +24,7 @@ const (
 
 )
 
+
 var DefaultCodeMapping = CodeMapping{
 	FailCode:              "操作失败",
 	FailUnknownCode:       "未知接口",
