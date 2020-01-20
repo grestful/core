@@ -2,16 +2,6 @@ package core
 
 import "strconv"
 
-type ISession interface {
-	Close () bool
-	Destroy(sid string)  bool
-	Gc(maxLeftTime int64)  bool
-	Open(savePath string)  bool
-	Read(sid string) map[string]string
-	Write(sid string, data map[string]string)  bool
-	Error(sid string) error
-}
-
 type IUserSession interface {
 	ISession
 	SetData(data map[string]interface{}) error

@@ -46,5 +46,47 @@ type ICache interface {
 type IModel interface {
 	GetBytes() []byte
 	GetString() string
+
+	Save() bool
+	Create() bool
+	Delete() bool
+	One(sql string, args ...interface{}) IGetterSetter
+	List(sql string, args ...interface{}) []IGetterSetter
+
+	TableName() string
+	GetKeyName() string
+	GetKey() int64
 	GetName() string
+}
+
+
+type IGetterSetter interface {
+	GetAttribute(key string) interface{}
+	SetAttribute(key string, value interface{}) bool
+	SetAttributes(mp map[string]interface{}) bool
+	GetAttributes() map[string]interface{}
+
+	GetAttrInt(key string) (int, error)
+	GetAttrInt64(key string)(int64, error)
+	GetAttrFloat(key string) (float32, error)
+	GetAttrFloat64(key string)(float64, error)
+	GetAttrUInt(key string) (uint, error)
+	GetAttrUInt64(key string)(uint64, error)
+	GetAttrBool(key string) (bool, error)
+	GetAttrString(key string)(string, error)
+}
+
+
+type ISession interface {
+	Close () bool
+	Destroy(sid string)  bool
+	Gc(maxLeftTime int64)  bool
+	Open(savePath string)  bool
+	Read(sid string) map[string]string
+	Write(sid string, data map[string]string)  bool
+	Error(sid string) error
+}
+
+type IRouter interface {
+
 }

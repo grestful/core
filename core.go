@@ -3,7 +3,7 @@ package core
 import (
 	"github.com/Unknwon/goconfig"
 	"github.com/gin-gonic/gin"
-	"github.com/go-redis/redis/v7"
+	"github.com/go-redis/redis"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 	log "github.com/sirupsen/logrus"
@@ -25,6 +25,17 @@ func GetCore() *Core {
 
 func GetLog() *log.Logger {
 	return GetCore().Log
+}
+
+func GetDb(name string) *gorm.DB  {
+	if name == "" {
+		name = "default"
+	}
+	return GetCore().GetDb(name)
+}
+
+func GetRouter() IRouter {
+	return GetCore().Gin
 }
 
 func (gG *Core) Group(path string, handlers ...gin.HandlerFunc) *gin.RouterGroup {
