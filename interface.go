@@ -74,6 +74,8 @@ type IGetterSetter interface {
 	GetAttrUInt64(key string)(uint64, error)
 	GetAttrBool(key string) (bool, error)
 	GetAttrString(key string)(string, error)
+
+	GetAttrTime(key string)(time.Time, error)
 }
 
 

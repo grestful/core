@@ -5,6 +5,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"reflect"
 	"testing"
+	"time"
 )
 
 type My struct{
@@ -76,7 +77,9 @@ return false,nil
 func (o Order) GetAttrString(key string)(string, error) {
 return "",nil
 }
-
+func (o Order) GetAttrTime(key string)(time.Time, error) {
+	return time.Now(),nil
+}
 func Test_OrmModel(t *testing.T) {
 
 
