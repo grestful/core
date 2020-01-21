@@ -24,57 +24,78 @@ type TableInfo struct {
 	Key   string `json:"key"`
 }
 
+//set model orm with gorm
 func (m *Model) SetGorm(db *gorm.DB) {
 	m.db = db
 }
 
+//alias get model name
 func (m *Model) GetKeyName() string {
 	return m.Info.Table
 }
 
+// get model primary key
 func (m *Model) GetKey() int64 {
-	if m.Value != nil {
-		v, e := m.GetAttrInt64(m.GetKeyName())
-		if e == nil {
-			return v
-		}
+	if !m.checkValueSet() {
+		return 0
 	}
 
-	return 0
+	v, e := m.GetAttrInt64(m.GetKeyName())
+	if e != nil {
+		m.Err = e
+		return 0
+	}
+
+	return v
 }
+
+//alias get model name
 func (m *Model) GetName() string {
 	return m.Info.Table
 }
 
+//get model table name
 func (m *Model) TableName() string {
 	return m.Info.Table
 }
 
+//get real value string
 func (m *Model) GetString() string {
-	if m.Value != nil {
-		b, _ := json.Marshal(m.Value)
-		return string(b[:])
+
+	if !m.checkValueSet() {
+		return ""
 	}
 
-	return ""
+	b, _ := json.Marshal(m.Value)
+	return string(b[:])
 }
 
+//get real value bytes
 func (m *Model) GetBytes() []byte {
-	if m.Value != nil {
-		b, _ := json.Marshal(m.Value)
-		return b
+	if !m.checkValueSet() {
+		return nil
 	}
 
-	return nil
+	b, _ := json.Marshal(m.Value)
+	return b
 }
 
+//update model m.Value value.primary key
 func (m *Model) Update() bool {
-	if m.Value == nil {
+	if !m.checkValueSet() {
 		return false
 	}
 
-	err := m.db.Model(m.Value).Table(m.TableName()).UpdateColumns(m.Value).Error
+	id, err := m.GetAttrInt64(m.GetKeyName())
 	if err != nil {
+		m.Err = errors.New("must set Value use orm struct")
+		return false
+	}
+
+	err = m.db.Model(m.Value).Table(m.TableName()).
+		Where(m.GetKeyName() + " = " + utils.Int642String(id)).UpdateColumns(m.Value).Error
+	if err != nil {
+		m.Err = err
 		return false
 	}
 
@@ -85,50 +106,69 @@ func (m *Model) Update() bool {
 	return true
 }
 
+//create model with value
 func (m *Model) Create() int64 {
-	o := m.db.New()
-	err := o.Table(m.TableName()).Create(m.Value).Error
-	if err != nil {
+	if !m.checkValueSet() {
 		return 0
 	}
 
+	o := m.db.New()
+	err := o.Table(m.TableName()).Create(m.Value).Error
+	if err != nil {
+		m.Err = err
+		return 0
+	}
+
+
 	id, err := m.GetAttrInt64(m.GetKeyName())
 	if err != nil {
+		m.Err = err
 		return 0
 	}
 
 	if id < 1 {
+		m.Err = errors.New("insert fail")
 		return 0
 	}
 
 	return id
 }
 
+//delete model with value.primary key
 func (m *Model) Delete() bool {
-	if m.Value != nil {
-		id, err := m.GetAttrInt64(m.GetKeyName())
-		if err != nil {
-			m.Err = errors.New("must set Value use orm struct")
-			return false
-		}
-
-		o := m.db.New()
-		o.Table(m.TableName()).Where(m.GetKeyName() + " = " + utils.Int642String(id)).Delete(m.Value)
-		if o.RowsAffected == 1 {
-			return true
-		}
+	if !m.checkValueSet() {
+		return false
 	}
+	id, err := m.GetAttrInt64(m.GetKeyName())
+	if err != nil {
+		m.Err = errors.New("must set Value use orm struct")
+		return false
+	}
+
+	o := m.db.New()
+	o.Table(m.TableName()).Where(m.GetKeyName() + " = " + utils.Int642String(id)).Delete(m.Value)
+	if o.RowsAffected == 1 {
+		return true
+	}
+
+	m.Err = errors.New("rows affected zero")
 
 	return false
 }
 
+//get One Value impl IGetterSetter
 func (m *Model) One(sql string, args ...interface{}) IGetterSetter {
+	if !m.checkValueSet() {
+		return nil
+	}
+
 	typ := reflect.TypeOf(m.Value)
 	value := reflect.New(typ)
 
 	o := m.db.New()
 	err := o.Table(m.TableName()).Where(sql, args).Scan(value.Interface()).Error
 	if err != nil {
+		m.Err = err
 		return nil
 	}
 
@@ -136,10 +176,16 @@ func (m *Model) One(sql string, args ...interface{}) IGetterSetter {
 		return v
 	}
 
+	m.Err = errors.New("value not impl IGetterSetter")
 	return nil
 }
 
+//get List Value impl IGetterSetter
 func (m *Model) List(sql string, args ...interface{}) []IGetterSetter {
+	if !m.checkValueSet() {
+		return nil
+	}
+
 	typ := reflect.TypeOf(m.Value)
 
 	modelType := reflect.SliceOf(typ)
@@ -151,6 +197,7 @@ func (m *Model) List(sql string, args ...interface{}) []IGetterSetter {
 	o := m.db.New()
 	err := o.Table(m.TableName()).Where(sql, args).Scan(slice.Interface()).Error
 	if err != nil {
+		m.Err = err
 		return nil
 	}
 
@@ -172,6 +219,10 @@ func (m *Model) List(sql string, args ...interface{}) []IGetterSetter {
 }
 
 func (m *Model) GetAttribute(key string) interface{} {
+	if !m.checkValueSet() {
+		return nil
+	}
+
 	if v, ok := m.attrMap[key]; ok {
 		return v
 	}
@@ -183,6 +234,10 @@ func (m *Model) GetAttribute(key string) interface{} {
 }
 
 func (m *Model) SetAttribute(key string, value interface{}) bool {
+	if !m.checkValueSet() {
+		return false
+	}
+
 	if utils.StructExistsProperty(m.Value, key) {
 		vt := reflect.TypeOf(value).String()
 		mt := reflect.TypeOf(m.Value).String()
@@ -197,13 +252,22 @@ func (m *Model) SetAttribute(key string, value interface{}) bool {
 	return false
 }
 func (m *Model) SetAttributes(mp map[string]interface{}) bool {
+	if !m.checkValueSet() {
+		return false
+	}
 	m.attrMap = mp
 	return true
 }
 func (m *Model) GetAttributes() map[string]interface{} {
+	if !m.checkValueSet() {
+		return nil
+	}
 	return m.attrMap
 }
 func (m *Model) GetAttrInt(key string) (int, error) {
+	if !m.checkValueSet() {
+		return 0,m.Err
+	}
 	if v, ok := m.attrMap[key]; ok {
 		return v.(int), nil
 	}
@@ -218,6 +282,9 @@ func (m *Model) GetAttrInt(key string) (int, error) {
 	return 0, errors.New("type is not int")
 }
 func (m *Model) GetAttrInt64(key string) (int64, error) {
+	if !m.checkValueSet() {
+		return 0,m.Err
+	}
 	if v, ok := m.attrMap[key]; ok {
 		return v.(int64), nil
 	}
@@ -232,6 +299,9 @@ func (m *Model) GetAttrInt64(key string) (int64, error) {
 	return 0, errors.New("type is not int64")
 }
 func (m *Model) GetAttrFloat(key string) (float32, error) {
+	if !m.checkValueSet() {
+		return 0,m.Err
+	}
 	if v, ok := m.attrMap[key]; ok {
 		return v.(float32), nil
 	}
@@ -246,6 +316,9 @@ func (m *Model) GetAttrFloat(key string) (float32, error) {
 	return 0, errors.New("type is not float32")
 }
 func (m *Model) GetAttrFloat64(key string) (float64, error) {
+	if !m.checkValueSet() {
+		return 0,m.Err
+	}
 	if v, ok := m.attrMap[key]; ok {
 		return v.(float64), nil
 	}
@@ -261,6 +334,9 @@ func (m *Model) GetAttrFloat64(key string) (float64, error) {
 }
 
 func (m *Model) GetAttrUInt(key string) (uint, error) {
+	if !m.checkValueSet() {
+		return 0,m.Err
+	}
 	if v, ok := m.attrMap[key]; ok {
 		return v.(uint), nil
 	}
@@ -276,6 +352,9 @@ func (m *Model) GetAttrUInt(key string) (uint, error) {
 }
 
 func (m *Model) GetAttrUInt64(key string) (uint64, error) {
+	if !m.checkValueSet() {
+		return 0,m.Err
+	}
 	if v, ok := m.attrMap[key]; ok {
 		return v.(uint64), nil
 	}
@@ -291,6 +370,9 @@ func (m *Model) GetAttrUInt64(key string) (uint64, error) {
 }
 
 func (m *Model) GetAttrBool(key string) (bool, error) {
+	if !m.checkValueSet() {
+		return false,m.Err
+	}
 	if v, ok := m.attrMap[key]; ok {
 		return v.(bool), nil
 	}
@@ -306,6 +388,9 @@ func (m *Model) GetAttrBool(key string) (bool, error) {
 }
 
 func (m *Model) GetAttrString(key string) (string, error) {
+	if !m.checkValueSet() {
+		return "",m.Err
+	}
 	if v, ok := m.attrMap[key]; ok {
 		return v.(string), nil
 	}
@@ -321,6 +406,9 @@ func (m *Model) GetAttrString(key string) (string, error) {
 }
 
 func (m *Model) GetAttrTime(key string) (time.Time, error) {
+	if !m.checkValueSet() {
+		return time.Now(),m.Err
+	}
 	if v, ok := m.attrMap[key]; ok {
 		return v.(time.Time), nil
 	}
@@ -334,3 +422,14 @@ func (m *Model) GetAttrTime(key string) (time.Time, error) {
 	}
 	return time.Now(), errors.New("type is not time.Time")
 }
+
+//check value is nil
+func (m *Model) checkValueSet() bool {
+	if m.Value == nil {
+		m.Err = errors.New("please set value as impl IGetterSetter")
+		return false
+	}
+
+	return true
+}
+
