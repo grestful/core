@@ -18,6 +18,15 @@ type Model struct {
 	attrMap map[string]interface{}
 }
 
+func GetModel(modelStruct IModelStruct) *Model{
+	return &Model{
+		Value:   modelStruct,
+		Err:     nil,
+		db:      GetDb("default"),
+		attrMap: make(map[string]interface{}),
+	}
+}
+
 //set model orm with gorm
 func (m *Model) SetGorm(db *gorm.DB) {
 	m.db = db
