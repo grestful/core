@@ -47,8 +47,8 @@ type IModel interface {
 	GetBytes() []byte
 	GetString() string
 
-	Save() bool
-	Create() bool
+	Update() bool
+	Create() int64
 	Delete() bool
 	One(sql string, args ...interface{}) IGetterSetter
 	List(sql string, args ...interface{}) []IGetterSetter
@@ -78,6 +78,10 @@ type IGetterSetter interface {
 	GetAttrTime(key string)(time.Time, error)
 }
 
+type IModelStruct interface {
+	TableName() string
+	GetKeyName() string
+}
 
 type ISession interface {
 	Close () bool

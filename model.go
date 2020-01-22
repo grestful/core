@@ -10,18 +10,12 @@ import (
 )
 
 type Model struct {
-	Value interface{}
-	Info  TableInfo
+	Value IModelStruct
 	Err   error
 
 	db *gorm.DB
 
 	attrMap map[string]interface{}
-}
-
-type TableInfo struct {
-	Table string `json:"table"`
-	Key   string `json:"key"`
 }
 
 //set model orm with gorm
@@ -31,7 +25,7 @@ func (m *Model) SetGorm(db *gorm.DB) {
 
 //alias get model name
 func (m *Model) GetKeyName() string {
-	return m.Info.Table
+	return m.Value.GetKeyName()
 }
 
 // get model primary key
@@ -51,12 +45,12 @@ func (m *Model) GetKey() int64 {
 
 //alias get model name
 func (m *Model) GetName() string {
-	return m.Info.Table
+	return m.Value.TableName()
 }
 
 //get model table name
 func (m *Model) TableName() string {
-	return m.Info.Table
+	return m.Value.TableName()
 }
 
 //get real value string
@@ -92,15 +86,19 @@ func (m *Model) Update() bool {
 		return false
 	}
 
-	err = m.db.Model(m.Value).Table(m.TableName()).
-		Where(m.GetKeyName() + " = " + utils.Int642String(id)).UpdateColumns(m.Value).Error
-	if err != nil {
-		m.Err = err
-		return false
-	}
+	if m.attrMap != nil {
+		db := m.db.New()
+		err = db.Model(m.Value).Table(m.TableName()).
+			Where(m.GetKeyName() + " = " + utils.Int642String(id)).Update(m.attrMap).Error
 
-	if m.db.RowsAffected != 1 {
-		return false
+		if err != nil {
+			m.Err = err
+			return false
+		}
+
+		if db.RowsAffected != 1 {
+			return false
+		}
 	}
 
 	return true
@@ -118,7 +116,6 @@ func (m *Model) Create() int64 {
 		m.Err = err
 		return 0
 	}
-
 
 	id, err := m.GetAttrInt64(m.GetKeyName())
 	if err != nil {
@@ -146,7 +143,7 @@ func (m *Model) Delete() bool {
 	}
 
 	o := m.db.New()
-	o.Table(m.TableName()).Where(m.GetKeyName() + " = " + utils.Int642String(id)).Delete(m.Value)
+	o.Model(m.Value).Where(m.GetKeyName() + " = " + utils.Int642String(id)).Delete(m.Value)
 	if o.RowsAffected == 1 {
 		return true
 	}
@@ -186,15 +183,8 @@ func (m *Model) List(sql string, args ...interface{}) []IGetterSetter {
 		return nil
 	}
 
-	typ := reflect.TypeOf(m.Value)
-
-	modelType := reflect.SliceOf(typ)
-	sliceValue := reflect.MakeSlice(modelType, 0, 0)
-
-	slice := reflect.New(sliceValue.Type())
-	slice.Elem().Set(sliceValue)
-
 	o := m.db.New()
+	slice := utils.SliceBuildWithInterface(m.Value)
 	err := o.Table(m.TableName()).Where(sql, args).Scan(slice.Interface()).Error
 	if err != nil {
 		m.Err = err
@@ -239,34 +229,44 @@ func (m *Model) SetAttribute(key string, value interface{}) bool {
 	}
 
 	if utils.StructExistsProperty(m.Value, key) {
-		vt := reflect.TypeOf(value).String()
-		mt := reflect.TypeOf(m.Value).String()
-
-		if vt == mt {
+		if utils.StructSetFieldValue(m.Value, key, value) {
 			m.attrMap[key] = value
-			reflect.ValueOf(m.Value).FieldByName(key).Set(reflect.ValueOf(value))
 			return true
 		}
 	}
 
 	return false
 }
+
 func (m *Model) SetAttributes(mp map[string]interface{}) bool {
 	if !m.checkValueSet() {
 		return false
 	}
+	//for key,value := range mp {
+	//	if utils.StructExistsProperty(m.Value, key) {
+	//		vt := reflect.TypeOf(value).String()
+	//		mt := reflect.TypeOf(m.Value).String()
+	//
+	//		if vt == mt {
+	//			m.attrMap[key] = value
+	//			reflect.ValueOf(m.Value).FieldByName(key).Set(reflect.ValueOf(value))
+	//		}
+	//	}
+	//}
 	m.attrMap = mp
 	return true
 }
+
 func (m *Model) GetAttributes() map[string]interface{} {
 	if !m.checkValueSet() {
 		return nil
 	}
 	return m.attrMap
 }
+
 func (m *Model) GetAttrInt(key string) (int, error) {
 	if !m.checkValueSet() {
-		return 0,m.Err
+		return 0, m.Err
 	}
 	if v, ok := m.attrMap[key]; ok {
 		return v.(int), nil
@@ -283,7 +283,7 @@ func (m *Model) GetAttrInt(key string) (int, error) {
 }
 func (m *Model) GetAttrInt64(key string) (int64, error) {
 	if !m.checkValueSet() {
-		return 0,m.Err
+		return 0, m.Err
 	}
 	if v, ok := m.attrMap[key]; ok {
 		return v.(int64), nil
@@ -300,7 +300,7 @@ func (m *Model) GetAttrInt64(key string) (int64, error) {
 }
 func (m *Model) GetAttrFloat(key string) (float32, error) {
 	if !m.checkValueSet() {
-		return 0,m.Err
+		return 0, m.Err
 	}
 	if v, ok := m.attrMap[key]; ok {
 		return v.(float32), nil
@@ -317,7 +317,7 @@ func (m *Model) GetAttrFloat(key string) (float32, error) {
 }
 func (m *Model) GetAttrFloat64(key string) (float64, error) {
 	if !m.checkValueSet() {
-		return 0,m.Err
+		return 0, m.Err
 	}
 	if v, ok := m.attrMap[key]; ok {
 		return v.(float64), nil
@@ -335,7 +335,7 @@ func (m *Model) GetAttrFloat64(key string) (float64, error) {
 
 func (m *Model) GetAttrUInt(key string) (uint, error) {
 	if !m.checkValueSet() {
-		return 0,m.Err
+		return 0, m.Err
 	}
 	if v, ok := m.attrMap[key]; ok {
 		return v.(uint), nil
@@ -353,7 +353,7 @@ func (m *Model) GetAttrUInt(key string) (uint, error) {
 
 func (m *Model) GetAttrUInt64(key string) (uint64, error) {
 	if !m.checkValueSet() {
-		return 0,m.Err
+		return 0, m.Err
 	}
 	if v, ok := m.attrMap[key]; ok {
 		return v.(uint64), nil
@@ -371,7 +371,7 @@ func (m *Model) GetAttrUInt64(key string) (uint64, error) {
 
 func (m *Model) GetAttrBool(key string) (bool, error) {
 	if !m.checkValueSet() {
-		return false,m.Err
+		return false, m.Err
 	}
 	if v, ok := m.attrMap[key]; ok {
 		return v.(bool), nil
@@ -389,7 +389,7 @@ func (m *Model) GetAttrBool(key string) (bool, error) {
 
 func (m *Model) GetAttrString(key string) (string, error) {
 	if !m.checkValueSet() {
-		return "",m.Err
+		return "", m.Err
 	}
 	if v, ok := m.attrMap[key]; ok {
 		return v.(string), nil
@@ -407,7 +407,7 @@ func (m *Model) GetAttrString(key string) (string, error) {
 
 func (m *Model) GetAttrTime(key string) (time.Time, error) {
 	if !m.checkValueSet() {
-		return time.Now(),m.Err
+		return time.Now(), m.Err
 	}
 	if v, ok := m.attrMap[key]; ok {
 		return v.(time.Time), nil
@@ -432,4 +432,3 @@ func (m *Model) checkValueSet() bool {
 
 	return true
 }
-
