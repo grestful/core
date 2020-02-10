@@ -21,7 +21,6 @@ const (
 	FailParamsError = "-5"
 	FailPostMax     = "-6"
 	FailInternal	= "400"
-
 )
 
 

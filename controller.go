@@ -10,8 +10,6 @@ import (
 
 type Context struct {
 	*gin.Context
-	TrackId string //访问id
-	Session IUserSession
 }
 
 type ProcessFunc func(process *Controller) IError

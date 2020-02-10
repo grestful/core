@@ -16,7 +16,7 @@ type Core struct {
 	Config *goconfig.ConfigFile
 	Db     map[string]*gorm.DB
 	Redis  map[string]*redis.Client
-	//Cache
+	Cache  map[string]ICache
 }
 
 func GetCore() *Core {
@@ -53,6 +53,20 @@ func (gG *Core) Handle(httpMethod, relativePath string, handlers ...gin.HandlerF
 //func (gG *Core) Db(name string) {
 //	return
 //}
+func (gG *Core) GetDefaultCache() ICache {
+	if db, ok := gG.Cache["default"]; ok {
+		return db
+	}
+	return nil
+}
+
+func (gG *Core) GetCache(name string) ICache {
+	if db, ok := gG.Cache[name]; ok {
+		return db
+	}
+
+	panic(name + " cache not exists")
+}
 
 func (gG *Core) GetDefaultDb() *gorm.DB {
 	if db, ok := gG.Db["default"]; ok {

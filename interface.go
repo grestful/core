@@ -31,7 +31,7 @@ type ICache interface {
 	GetString(key string) string
 	GetMap(key string) map[string]string
 	GetList(key string) []string
-	GetValue(key string, val *interface{}) error
+	GetValue(key string) (string, error)
 
 	SetValue(key string, val interface{}, ex time.Duration) error
 	SetList(key string,  val... interface{}) error
