@@ -47,7 +47,16 @@ func InitConfig(path string) {
 		initDb()
 
 		initRedis()
+
+		initSessionType()
 	})
+}
+
+func initSessionType() {
+	cf, err := gGore.Config.GetValue("", "SESSION_TYPE")
+	if err == nil {
+		gGore.SessionType = cf
+	}
 }
 
 func initDb() {

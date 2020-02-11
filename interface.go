@@ -83,15 +83,6 @@ type IModelStruct interface {
 	GetKeyName() string
 }
 
-type ISession interface {
-	Close () bool
-	Destroy(sid string)  bool
-	Gc(maxLeftTime int64)  bool
-	Open(savePath string)  bool
-	Read(sid string) map[string]string
-	Write(sid string, data map[string]string)  bool
-	Error(sid string) error
-}
 
 type IRouter interface {
 

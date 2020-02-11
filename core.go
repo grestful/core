@@ -17,6 +17,7 @@ type Core struct {
 	Db     map[string]*gorm.DB
 	Redis  map[string]*redis.Client
 	Cache  map[string]ICache
+	SessionType string
 }
 
 func GetCore() *Core {
@@ -32,6 +33,10 @@ func GetDb(name string) *gorm.DB  {
 		name = "default"
 	}
 	return GetCore().GetDb(name)
+}
+
+func (gG *Core) GetSessionType() string {
+	return gG.SessionType
 }
 
 func GetRouter() IRouter {
@@ -84,18 +89,18 @@ func (gG *Core) GetDb(name string) *gorm.DB {
 }
 
 func (gG *Core) GetDefaultRedis() *redis.Client {
-	if c, ok := gG.Redis["redis"]; ok {
+	if c, ok := gG.Redis["default"]; ok {
 		return c
 	}
 	return nil
 }
 
-func (gG *Core) GetRedis(name string) *gorm.DB {
-	if db, ok := gG.Db[name]; ok {
-		return db
+func (gG *Core) GetRedis(name string) *redis.Client {
+	if c, ok := gG.Redis[name]; ok {
+		return c
 	}
 
-	panic(name + " db not exists")
+	return nil
 }
 
 func (gG *Core) SetLoggerFormat(format log.Formatter) {
