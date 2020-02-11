@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/Unknwon/goconfig"
 	"github.com/gin-gonic/gin"
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis/v7"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/grestful/utils"
 	"github.com/jinzhu/gorm"
