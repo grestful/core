@@ -1,0 +1,34 @@
+# config
+
+path: ./config/config.json
+
+demo:
+
+```
+SERVICE_NAME = {{packageName}}
+ENV = dev
+PORT = 8082
+
+MYSQL_DSN = root:sa@tcp(localhost:3306)/test
+SESSION_NAME = "{{packageName}}_sid"
+
+# session type file、redis
+SESSION_TYPE = "file"
+# if session type redis
+[session]
+file_path = "/tmp"
+max_left_time = "3600"
+
+# redis_name = "default"
+
+# auth type cookies、token、http basic auth...
+AUTH_TYPE = "cookies"
+
+# redis default
+[redis]
+host = "127.0.0.1"
+port = "6379"
+auth = ""
+db   = 0
+
+```

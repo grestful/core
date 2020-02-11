@@ -30,12 +30,16 @@ func Session(process Controller) error {
 	typ := gGore.GetSessionType()
 
 	sid := ""
-	cook,err := process.GetContext().Request.Cookie("sid")
+	cookName,err := gGore.Config.GetValue("", "SESSION_NAME")
+	if cookName == "" {
+		cookName = "sid"
+	}
+	cook,err := process.GetContext().Request.Cookie(cookName)
 	if err != nil {
 		return err
 	}
 	if cook.Value == "" {
-		sid = process.GetContext().Request.URL.Query().Get("sid")
+		sid = process.GetContext().Request.URL.Query().Get(cookName)
 	}else{
 		sid = cook.Value
 	}
@@ -44,14 +48,14 @@ func Session(process Controller) error {
 		return errors.New("sid is empty")
 	}
 
-	maxLeftStr, err := gGore.Config.GetValue("session", "MAX_LEFT_TIME")
+	maxLeftStr, err := gGore.Config.GetValue("session", "max_left_time")
 	if err != nil || maxLeftStr == "" {
 		maxLeftStr = "3600"
 	}
 	maxLeft := utils.String2Int64(maxLeftStr, 3600)
 	switch typ {
 	case SessionTypeFile:
-		path, err := gGore.Config.GetValue("session", "FILE_PATH")
+		path, err := gGore.Config.GetValue("session", "file_path")
 		if err != nil || path == "" {
 			path = "/tmp"
 		}
@@ -60,7 +64,7 @@ func Session(process Controller) error {
 		process.Session = session.GetNewUserSession(sid, sess)
 		return nil
 	case SessionTypeRedis:
-		name, err := gGore.Config.GetValue("session", "REDIS_CONNECTION")
+		name, err := gGore.Config.GetValue("session", "redis_name")
 		if err != nil || name == "" {
 			name = "default"
 		}
