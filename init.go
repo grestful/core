@@ -8,7 +8,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/grestful/utils"
 	"github.com/jinzhu/gorm"
-	log "github.com/sirupsen/logrus"
+	log "github.com/grestful/logs"
 	"sync"
 	"time"
 )
@@ -26,7 +26,7 @@ func GetContext(g *gin.Context) *Context {
 func init() {
 	gGore = &Core{
 		Gin:    gin.New(),
-		Log:    log.New(),
+		Log:    log.Global,
 		Config: &goconfig.ConfigFile{},
 		Db:     make(map[string]*gorm.DB),
 		Redis:  make(map[string]*redis.Client),

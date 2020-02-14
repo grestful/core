@@ -31,4 +31,13 @@ port = "6379"
 auth = ""
 db   = 0
 
+[log]
+type = console|conn|file
+level = 1
+category = DEFAULT|SOCKET|FILE
+# if is socket
+net = tcp|udp
+addr = 192.168.0.22:3333
+
+
 ```
