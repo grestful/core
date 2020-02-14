@@ -87,16 +87,11 @@ func Test_OrmModel(t *testing.T) {
 
 	m := &Model{
 		Value: nil,
-		Info:  TableInfo{
-			Table:"order",
-			Key:"id",
-		},
 		Err:   Error{},
 		db:    nil,
 	}
 
 	m.db = GetDb("default")
-	m.Value = &Order{}
 	result := m.List("status = ?", 1)
 	fmt.Println(result, "result is null")
 

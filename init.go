@@ -6,9 +6,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v7"
 	_ "github.com/go-sql-driver/mysql"
+	log "github.com/grestful/logs"
 	"github.com/grestful/utils"
 	"github.com/jinzhu/gorm"
-	log "github.com/grestful/logs"
 	"sync"
 	"time"
 )
@@ -36,6 +36,43 @@ func init() {
 	}}
 }
 
+func initLog() {
+	log.Project = ServiceName
+	typ, err := gGore.Config.GetValue("log", "type")
+	if typ == "" || err != nil {
+		typ = "console"
+	}
+
+	switch typ {
+	case "file":
+	case "conn":
+		proto, err := gGore.Config.GetValue("log", "net")
+		if typ == "" || err != nil {
+			typ = "console"
+		}
+		addr, err := gGore.Config.GetValue("log", "addr")
+		if typ == "" || err != nil {
+			typ = "console"
+		}
+		level, err := gGore.Config.GetValue("log", "addr")
+		if typ == "" || err != nil {
+			typ = "console"
+		}
+		log.SetConn(log.SocketConfig{
+			Enable:   true,
+			Category: "SOCKET",
+			Level:    level,
+			Addr:     addr,
+			Protocol: proto,
+		})
+		log.SetDefaultLog(log.GetLogger("socket", ServiceName))
+	case "console":
+		fallthrough
+	default:
+
+	}
+}
+
 func InitConfig(path string) {
 	configOne.Do(func() {
 		var err error
@@ -43,6 +80,8 @@ func InitConfig(path string) {
 		if err != nil {
 			panic(fmt.Sprintf("无法加载配置文件：%s \n", err))
 		}
+		ServiceName,_ =  gGore.Config.GetValue("", "SERVICE_NAME")
+		initLog()
 
 		initDb()
 

@@ -9,6 +9,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+var ServiceName string
 type Core struct {
 	Gin         *gin.Engine
 	Log         log.Logger
