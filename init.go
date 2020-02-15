@@ -88,7 +88,7 @@ func initLog() {
 			Protocol: proto,
 		}
 		log.SetConn(conn)
-		writer := log.GetLogger("socket", ServiceName)
+		writer := log.GetLogger("socket")
 		logConfig.Output = writer
 		log.SetDefaultLog(writer)
 		GetCore().Gin.Use(gin.LoggerWithConfig(logConfig))
@@ -99,7 +99,7 @@ func initLog() {
 			Enable:  true,
 			Level:   "DEBUG",
 		})
-		writer := log.GetLogger("stdout", ServiceName)
+		writer := log.GetLogger("stdout")
 		logConfig.Output = writer
 		log.SetDefaultLog(writer)
 		GetCore().Gin.Use(gin.LoggerWithConfig(logConfig))
