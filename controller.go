@@ -179,7 +179,7 @@ func (process *Controller) getResponse() Response {
 }
 
 func (process *Controller) SetError(err IError) {
-	GetLog().Infof("set error in %s,track_id: %s, err: %v\n", process.Ctx.Context.Request.URL.Path, process.TrackId, err)
+	GetLog().Info("set error in %s,track_id: %s, err: %v\n", process.Ctx.Context.Request.URL.Path, process.TrackId, err)
 	process.error = err
 	return
 }
