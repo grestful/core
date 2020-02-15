@@ -9,6 +9,7 @@ import (
 	log "github.com/grestful/logs"
 	"github.com/grestful/utils"
 	"github.com/jinzhu/gorm"
+	"os"
 	"sync"
 	"time"
 )
@@ -37,29 +38,33 @@ func init() {
 }
 
 func initLog() {
-	GetCore().Gin.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
-		lg := &log.LogRecord{
-			Level:    1,
-			Created:  param.TimeStamp,
-			Source:   "",
-			Message:  fmt.Sprintf("ip: %s, method: %s, path: %s, code: %d, agent: %s, error %s",
-				param.ClientIP,
-				param.Method,
-				param.Path,
-				param.StatusCode,
-				param.Request.UserAgent(),
-				param.ErrorMessage),
-			Category: "default",
-		}
-
-		return log.FormatLogRecord(log.FORMAT, lg)
-	}))
+	log.Project = ServiceName
+	logConfig := gin.LoggerConfig{
+		Formatter: gin.LogFormatter(func(param gin.LogFormatterParams) string {
+			lg := &log.LogRecord{
+				Level:    1,
+				Created:  param.TimeStamp,
+				Source:   "",
+				Message:  fmt.Sprintf("ip: %s, method: %s, path: %s, code: %d, agent: %s, error %s",
+					param.ClientIP,
+					param.Method,
+					param.Path,
+					param.StatusCode,
+					param.Request.UserAgent(),
+					param.ErrorMessage),
+				Category: "default",
+			}
+			fmt.Fprintln(os.Stdout, log.FormatLogRecord(log.FORMAT, lg))
+			return log.FormatLogRecord(log.FORMAT, lg)
+		}),
+		Output:    os.Stdout,
+		SkipPaths: nil,
+	}
 	log.Project = ServiceName
 	typ, err := gGore.Config.GetValue("log", "type")
 	if typ == "" || err != nil {
 		typ = "console"
 	}
-
 	switch typ {
 	case "file":
 	case "conn":
@@ -83,8 +88,10 @@ func initLog() {
 			Protocol: proto,
 		}
 		log.SetConn(conn)
-		log.SetDefaultLog(log.GetLogger("socket", ServiceName))
-		GetCore().Gin.Use(gin.LoggerWithWriter(log.GetLogger("socket", ServiceName)))
+		writer := log.GetLogger("socket", ServiceName)
+		logConfig.Output = writer
+		log.SetDefaultLog(writer)
+		GetCore().Gin.Use(gin.LoggerWithConfig(logConfig))
 	case "console":
 		fallthrough
 	default:
@@ -92,8 +99,10 @@ func initLog() {
 			Enable:  true,
 			Level:   "DEBUG",
 		})
-		log.SetDefaultLog(log.GetLogger("stdout", ServiceName))
-		GetCore().Gin.Use(gin.LoggerWithWriter(log.GetLogger("socket", ServiceName)))
+		writer := log.GetLogger("stdout", ServiceName)
+		logConfig.Output = writer
+		log.SetDefaultLog(writer)
+		GetCore().Gin.Use(gin.LoggerWithConfig(logConfig))
 	}
 }
 
