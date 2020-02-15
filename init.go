@@ -37,6 +37,23 @@ func init() {
 }
 
 func initLog() {
+	GetCore().Gin.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
+		lg := &log.LogRecord{
+			Level:    1,
+			Created:  param.TimeStamp,
+			Source:   "",
+			Message:  fmt.Sprintf("ip: %s, method: %s, path: %s, code: %d, agent: %s, error %s",
+				param.ClientIP,
+				param.Method,
+				param.Path,
+				param.StatusCode,
+				param.Request.UserAgent(),
+				param.ErrorMessage),
+			Category: "default",
+		}
+
+		return log.FormatLogRecord(log.FORMAT, lg)
+	}))
 	log.Project = ServiceName
 	typ, err := gGore.Config.GetValue("log", "type")
 	if typ == "" || err != nil {
@@ -58,14 +75,16 @@ func initLog() {
 		if typ == "" || err != nil {
 			typ = "console"
 		}
-		log.SetConn(log.SocketConfig{
+		conn := log.SocketConfig{
 			Enable:   true,
 			Category: "SOCKET",
 			Level:    level,
 			Addr:     addr,
 			Protocol: proto,
-		})
+		}
+		log.SetConn(conn)
 		log.SetDefaultLog(log.GetLogger("socket", ServiceName))
+		GetCore().Gin.Use(gin.LoggerWithWriter(conn))
 	case "console":
 		fallthrough
 	default:
