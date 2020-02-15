@@ -71,24 +71,29 @@ func initLog() {
 		if typ == "" || err != nil {
 			typ = "console"
 		}
-		level, err := gGore.Config.GetValue("log", "addr")
-		if typ == "" || err != nil {
-			typ = "console"
+		level, err := gGore.Config.GetValue("log", "level")
+		if level == "" || err != nil {
+			level = "console"
 		}
 		conn := log.SocketConfig{
 			Enable:   true,
 			Category: "SOCKET",
-			Level:    level,
+			Level:    "DEBUG",
 			Addr:     addr,
 			Protocol: proto,
 		}
 		log.SetConn(conn)
 		log.SetDefaultLog(log.GetLogger("socket", ServiceName))
-		GetCore().Gin.Use(gin.LoggerWithWriter(conn))
+		GetCore().Gin.Use(gin.LoggerWithWriter(log.GetLogger("socket", ServiceName)))
 	case "console":
 		fallthrough
 	default:
-
+		log.SetConsole(log.ConsoleConfig{
+			Enable:  true,
+			Level:   "DEBUG",
+		})
+		log.SetDefaultLog(log.GetLogger("stdout", ServiceName))
+		GetCore().Gin.Use(gin.LoggerWithWriter(log.GetLogger("socket", ServiceName)))
 	}
 }
 
