@@ -14,7 +14,7 @@ type Context struct {
 	*gin.Context
 }
 
-type ProcessFunc func(process *Controller) IError
+type ProcessFunc func(controller*Controller) IError
 type Controller struct {
 	TrackId    string //访问id
 	Session    session.IUserSession
@@ -26,7 +26,7 @@ type Controller struct {
 	ProcessFun ProcessFunc
 }
 
-func Session(process Controller) error {
+func Session(controller *Controller) error {
 	typ := gGore.GetSessionType()
 
 	sid := ""
@@ -34,12 +34,12 @@ func Session(process Controller) error {
 	if cookName == "" {
 		cookName = "sid"
 	}
-	cook,err := process.GetContext().Request.Cookie(cookName)
+	cook,err := controller.GetContext().Request.Cookie(cookName)
 	if err != nil {
 		return err
 	}
 	if cook.Value == "" {
-		sid = process.GetContext().Request.URL.Query().Get(cookName)
+		sid = controller.GetContext().Request.URL.Query().Get(cookName)
 	}else{
 		sid = cook.Value
 	}
@@ -61,7 +61,7 @@ func Session(process Controller) error {
 		}
 
 		sess := session.GetNewFileSession(path, maxLeft)
-		process.Session = session.GetNewUserSession(sid, sess)
+		controller.Session = session.GetNewUserSession(sid, sess)
 		return nil
 	case SessionTypeRedis:
 		name, err := gGore.Config.GetValue("session", "redis_name")
@@ -74,20 +74,20 @@ func Session(process Controller) error {
 		}
 		maxLeft := utils.String2Int64(maxLeftStr, 3600)
 		sess := session.GetNewRedisSession(c, maxLeft)
-		process.Session = session.GetNewUserSession(sid, sess)
+		controller.Session = session.GetNewUserSession(sid, sess)
 		return nil
 	}
 
 	return errors.New("session type error")
 }
 
-func RunProcess(process IController, g *gin.Context) {
+func RunProcess(controller IController, g *gin.Context) {
 	c := GetContext(g)
-	process.SetContext(c)
+	controller.SetContext(c)
 	var ierr IError
 	defer func() {
 		if ierr != nil {
-			process.SetError(ierr)
+			controller.SetError(ierr)
 		}
 
 		var err error
@@ -100,37 +100,37 @@ func RunProcess(process IController, g *gin.Context) {
 			}
 		}()
 
-		res := process.getResponse()
+		res := controller.getResponse()
 
 		rJson(c, res)
 	}()
 
-	if ierr = getTrackId(process); ierr != nil {
+	if ierr = getTrackId(controller); ierr != nil {
 		return
 	}
-	if ierr = runProcess(process); ierr != nil {
+	if ierr = runProcess(controller); ierr != nil {
 		return
 	}
 }
 
-func getTrackId(process IController) IError {
-	trackId := utils.GetRequestKey(process.GetContext().Request, "track_id")
+func getTrackId(controller IController) IError {
+	trackId := utils.GetRequestKey(controller.GetContext().Request, "track_id")
 	if trackId == "" {
 		return NewErrorStr("need params track_id")
 	}
-	process.SetTrackId(trackId)
+	controller.SetTrackId(trackId)
 	return nil
 }
 
-//run process
-func runProcess(process IController) (err IError) {
-	err = process.Decode()
+//run controller process
+func runProcess(controller IController) (err IError) {
+	err = controller.Decode()
 	if err != nil {
-		process.SetError(err)
+		controller.SetError(err)
 		return
 	}
 
-	err = process.Process()
+	err = controller.Process()
 	if err != nil {
 		return
 	}
@@ -138,20 +138,20 @@ func runProcess(process IController) (err IError) {
 	return
 }
 
-func (process *Controller) Decode() IError {
-	process.Data = nil
+func (controller*Controller) Decode() IError {
+	controller.Data = nil
 
-	switch process.Ctx.Context.Request.Method {
+	switch controller.Ctx.Context.Request.Method {
 	case http.MethodPost:
 		fallthrough
 	case http.MethodPut:
-		if process.Ctx.Context.Request.Header.Get("Content-type") == "application/json" {
-			bt, err := process.Ctx.GetRawData()
+		if controller.Ctx.Context.Request.Header.Get("Content-type") == "application/json" {
+			bt, err := controller.Ctx.GetRawData()
 			if err == nil {
 				if len(bt) == 0 {
 					bt = []byte("{}")
 				}
-				if err := json.Unmarshal(bt, &process.Req); err != nil {
+				if err := json.Unmarshal(bt, &controller.Req); err != nil {
 					return NewErrorCode(FailJsonParse)
 				}
 			}
@@ -163,41 +163,41 @@ func (process *Controller) Decode() IError {
 	return nil
 }
 
-func (process *Controller) Process() IError {
-	if process.ProcessFun != nil {
-		return process.ProcessFun(process)
+func (controller*Controller) Process() IError {
+	if controller.ProcessFun != nil {
+		return controller.ProcessFun(controller)
 	}
 	return nil
 }
 
-func (process *Controller) getResponse() Response {
-	if process.error != nil {
-		return getDefaultErrorResponse(process.error)
+func (controller*Controller) getResponse() Response {
+	if controller.error != nil {
+		return getDefaultErrorResponse(controller.error)
 	} else {
-		return getResponseWithCode(process.Code, process.Data)
+		return getResponseWithCode(controller.Code, controller.Data)
 	}
 }
 
-func (process *Controller) SetError(err IError) {
-	GetLog().Info("set error in %s,track_id: %s, err: %v\n", process.Ctx.Context.Request.URL.Path, process.TrackId, err)
-	process.error = err
+func (controller*Controller) SetError(err IError) {
+	GetLog().Info("set error in %s,track_id: %s, err: %s\n", controller.Ctx.Context.Request.URL.Path, controller.TrackId, err.GetMsg())
+	controller.error = err
 	return
 }
 
-func (process *Controller) GetTrackId() string {
-	return process.TrackId
+func (controller*Controller) GetTrackId() string {
+	return controller.TrackId
 }
 
-func (process *Controller) SetTrackId(id string) {
-	process.TrackId = id
+func (controller*Controller) SetTrackId(id string) {
+	controller.TrackId = id
 }
 
-func (process *Controller) SetContext(c *Context) {
-	if process.Ctx == nil {
-		process.Ctx = c
+func (controller*Controller) SetContext(c *Context) {
+	if controller.Ctx == nil {
+		controller.Ctx = c
 	}
 }
 
-func (process *Controller) GetContext() *Context {
-	return process.Ctx
+func (controller*Controller) GetContext() *Context {
+	return controller.Ctx
 }
