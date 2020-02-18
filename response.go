@@ -31,7 +31,7 @@ func getDefaultErrorResponse(err IError) Response {
 	}
 
 	return Response{
-		"500", "操作失败", data,
+		err.GetCode(), err.GetMsg(), data,
 	}
 }
 
