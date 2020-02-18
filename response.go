@@ -2,6 +2,7 @@ package core
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -29,7 +30,7 @@ func getDefaultErrorResponse(err IError) Response {
 	} else {
 		data = err.Error()
 	}
-
+	fmt.Println(err)
 	return Response{
 		err.GetCode(), err.GetMsg(), data,
 	}
