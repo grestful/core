@@ -7,7 +7,7 @@ import (
 
 type Response struct {
 	Code string      `json:"retcode"`
-	Msg  string      `json:"detail"`
+	Msg  string      `json:"desc"`
 	Data interface{} `json:"biz"`
 }
 
