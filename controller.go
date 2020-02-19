@@ -8,6 +8,7 @@ import (
 	"github.com/grestful/session"
 	"github.com/grestful/utils"
 	"net/http"
+	"time"
 )
 
 type Context struct {
@@ -116,7 +117,8 @@ func RunProcess(controller IController, g *gin.Context) {
 func getTrackId(controller IController) IError {
 	trackId := utils.GetRequestKey(controller.GetContext().Request, "track_id")
 	if trackId == "" {
-		return NewErrorStr("need params track_id")
+		//return NewErrorStr("need params track_id")
+		trackId = utils.Int642String(time.Now().Unix() * 1000)
 	}
 	controller.SetTrackId(trackId)
 	return nil

@@ -2,14 +2,13 @@ package core
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 )
 
 type Response struct {
-	Code string      `json:"code"`
-	Msg  string      `json:"msg"`
-	Data interface{} `json:"data"`
+	Code string      `json:"retcode"`
+	Msg  string      `json:"detail"`
+	Data interface{} `json:"biz"`
 }
 
 func (res Response) GetBytes() []byte {
@@ -30,7 +29,7 @@ func getDefaultErrorResponse(err IError) Response {
 	} else {
 		data = err.Error()
 	}
-	fmt.Println(err)
+
 	return Response{
 		err.GetCode(), err.GetMsg(), data,
 	}
