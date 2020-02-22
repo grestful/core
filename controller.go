@@ -87,6 +87,14 @@ func RunProcess(controller IController, g *gin.Context) {
 	controller.SetContext(c)
 	var ierr IError
 	defer func() {
+		if x := recover(); x != nil {
+			GetCore().Log.Error(" panic :", x)
+			ierr = Error{
+				Code: "500",
+				Msg:  "运行时内部错误",
+				Err:  x,
+			}
+		}
 		if ierr != nil {
 			controller.SetError(ierr)
 		}

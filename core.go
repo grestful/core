@@ -20,6 +20,10 @@ type Core struct {
 	SessionType string
 }
 
+func GetConfig() *goconfig.ConfigFile  {
+	return  GetCore().Config
+}
+
 func GetCore() *Core {
 	return gGore
 }
