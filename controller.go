@@ -8,6 +8,7 @@ import (
 	"github.com/grestful/session"
 	"github.com/grestful/utils"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -155,7 +156,8 @@ func (controller*Controller) Decode() IError {
 	case http.MethodPost:
 		fallthrough
 	case http.MethodPut:
-		if controller.Ctx.Context.Request.Header.Get("Content-Type") == "application/json" {
+		ct := controller.Ctx.Context.Request.Header.Get("Content-Type")
+		if strings.Contains(ct, "json") {
 			bt, err := controller.Ctx.GetRawData()
 			if err == nil {
 				if len(bt) == 0 {
