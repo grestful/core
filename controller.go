@@ -155,7 +155,7 @@ func (controller*Controller) Decode() IError {
 	case http.MethodPost:
 		fallthrough
 	case http.MethodPut:
-		if controller.Ctx.Context.Request.Header.Get("Content-type") == "application/json" {
+		if controller.Ctx.Context.Request.Header.Get("Content-Type") == "application/json" {
 			bt, err := controller.Ctx.GetRawData()
 			if err == nil {
 				if len(bt) == 0 {
