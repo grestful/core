@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/grestful/logs"
 	"github.com/grestful/session"
 	"github.com/grestful/utils"
 	"net/http"
@@ -16,7 +17,7 @@ type Context struct {
 	*gin.Context
 }
 
-type ProcessFunc func(controller*Controller) IError
+type ProcessFunc func(controller *Controller) IError
 type Controller struct {
 	TrackId    string //访问id
 	Session    session.IUserSession
@@ -32,17 +33,17 @@ func Session(controller *Controller) error {
 	typ := gGore.GetSessionType()
 
 	sid := ""
-	cookName,err := gGore.Config.GetValue("", "SESSION_NAME")
+	cookName, err := gGore.Config.GetValue("", "SESSION_NAME")
 	if cookName == "" {
 		cookName = "sid"
 	}
-	cook,err := controller.GetContext().Request.Cookie(cookName)
+	cook, err := controller.GetContext().Request.Cookie(cookName)
 	if err != nil {
 		return err
 	}
 	if cook.Value == "" {
 		sid = controller.GetContext().Request.URL.Query().Get(cookName)
-	}else{
+	} else {
 		sid = cook.Value
 	}
 
@@ -72,7 +73,7 @@ func Session(controller *Controller) error {
 		}
 		c := gGore.GetRedis(name)
 		if c == nil {
-			return errors.New(fmt.Sprintf("can't find redis connection name %s" , name))
+			return errors.New(fmt.Sprintf("can't find redis connection name %s", name))
 		}
 		maxLeft := utils.String2Int64(maxLeftStr, 3600)
 		sess := session.GetNewRedisSession(c, maxLeft)
@@ -89,7 +90,7 @@ func RunProcess(controller IController, g *gin.Context) {
 	var ierr IError
 	defer func() {
 		if x := recover(); x != nil {
-			GetCore().Log.Error(" panic :", x)
+			logs.Error(" panic :", x)
 			ierr = Error{
 				Code: "500",
 				Msg:  "运行时内部错误",
@@ -149,7 +150,7 @@ func runProcess(controller IController) (err IError) {
 	return
 }
 
-func (controller*Controller) Decode() IError {
+func (controller *Controller) Decode() IError {
 	controller.Data = nil
 
 	switch controller.Ctx.Context.Request.Method {
@@ -175,14 +176,14 @@ func (controller*Controller) Decode() IError {
 	return nil
 }
 
-func (controller*Controller) Process() IError {
+func (controller *Controller) Process() IError {
 	if controller.ProcessFun != nil {
 		return controller.ProcessFun(controller)
 	}
 	return nil
 }
 
-func (controller*Controller) getResponse() Response {
+func (controller *Controller) getResponse() Response {
 	if controller.error != nil {
 		return getDefaultErrorResponse(controller.error)
 	} else {
@@ -190,26 +191,26 @@ func (controller*Controller) getResponse() Response {
 	}
 }
 
-func (controller*Controller) SetError(err IError) {
+func (controller *Controller) SetError(err IError) {
 	GetLog().Info("set error in %s,track_id: %s, err: %s\n", controller.Ctx.Context.Request.URL.Path, controller.TrackId, err.GetMsg())
 	controller.error = err
 	return
 }
 
-func (controller*Controller) GetTrackId() string {
+func (controller *Controller) GetTrackId() string {
 	return controller.TrackId
 }
 
-func (controller*Controller) SetTrackId(id string) {
+func (controller *Controller) SetTrackId(id string) {
 	controller.TrackId = id
 }
 
-func (controller*Controller) SetContext(c *Context) {
+func (controller *Controller) SetContext(c *Context) {
 	if controller.Ctx == nil {
 		controller.Ctx = c
 	}
 }
 
-func (controller*Controller) GetContext() *Context {
+func (controller *Controller) GetContext() *Context {
 	return controller.Ctx
 }

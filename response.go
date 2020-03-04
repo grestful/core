@@ -29,7 +29,10 @@ func getDefaultErrorResponse(err IError) Response {
 	} else {
 		data = err.Error()
 	}
-
+	//
+	if _,ok := data.(string); ok {
+		data = nil
+	}
 	return Response{
 		err.GetCode(), err.GetMsg(), data,
 	}
