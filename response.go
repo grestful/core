@@ -4,7 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 )
-
+var ResponseDataNil = struct {
+}{}
 type Response struct {
 	Code string      `json:"retcode"`
 	Msg  string      `json:"desc"`
@@ -26,13 +27,15 @@ func getDefaultErrorResponse(err IError) Response {
 
 	if err.Error() == "操作失败" {
 		data = err.GetDetail()
-	} else {
-		data = err.Error()
 	}
-	//
-	if _,ok := data.(string); ok {
-		data = nil
+
+	if data == nil {
+		data = ResponseDataNil
 	}
+
+	//if _,ok := data.(string); ok {
+	//	data = ResponseDataNil
+	//}
 	return Response{
 		err.GetCode(), err.GetMsg(), data,
 	}
