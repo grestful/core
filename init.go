@@ -42,10 +42,10 @@ func initLog() {
 	logConfig := gin.LoggerConfig{
 		Formatter: gin.LogFormatter(func(param gin.LogFormatterParams) string {
 			lg := &log.LogRecord{
-				Level:    1,
-				Created:  param.TimeStamp,
-				Source:   "",
-				Message:  fmt.Sprintf("ip: %s, method: %s, path: %s, code: %d, agent: %s, error %s",
+				Level:   1,
+				Created: param.TimeStamp,
+				Source:  "",
+				Message: fmt.Sprintf("ip: %s, method: %s, path: %s, code: %d, agent: %s, error %s",
 					param.ClientIP,
 					param.Method,
 					param.Path,
@@ -54,7 +54,7 @@ func initLog() {
 					param.ErrorMessage),
 				Category: "default",
 			}
-			fmt.Fprintln(os.Stdout, log.FormatLogRecord(log.FORMAT, lg))
+			// fmt.Fprintln(os.Stdout, log.FormatLogRecord(log.FORMAT, lg))
 			return log.FormatLogRecord(log.FORMAT, lg)
 		}),
 		Output:    os.Stdout,
@@ -96,8 +96,8 @@ func initLog() {
 		fallthrough
 	default:
 		log.SetConsole(log.ConsoleConfig{
-			Enable:  true,
-			Level:   "DEBUG",
+			Enable: true,
+			Level:  "DEBUG",
 		})
 		writer := log.GetLogger("stdout")
 		logConfig.Output = writer
@@ -113,7 +113,7 @@ func InitConfig(path string) {
 		if err != nil {
 			panic(fmt.Sprintf("无法加载配置文件：%s \n", err))
 		}
-		ServiceName,_ =  gGore.Config.GetValue("", "SERVICE_NAME")
+		ServiceName, _ = gGore.Config.GetValue("", "SERVICE_NAME")
 		initLog()
 
 		initDb()
@@ -138,6 +138,10 @@ func initDb() {
 		if err == nil {
 			GetCore().Db["default"] = db
 		}
+	}
+
+	if err != nil {
+		log.Error("db init error: %s", err.Error())
 	}
 }
 
@@ -164,5 +168,9 @@ func initRedis() {
 		if c.Ping().Err() == nil {
 			GetCore().Redis["default"] = c
 		}
+	}
+
+	if err != nil {
+		log.Error("redis init error: %s", err.Error())
 	}
 }

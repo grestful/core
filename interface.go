@@ -2,14 +2,33 @@ package core
 
 import "time"
 
+// It's a controller with a request process
 type IController interface {
+
+	//set context(gin)
 	SetContext(ctx *Context)
+	//get context(gin)
 	GetContext() *Context
+	//self decode request obj
+	//example:
+	//get: ?a=b&c=d  => struct{A:b string `url:"a"`,C:d string `url:"c"`}
+	//post(json): {"a":"b","c":"d"} struct{A:b string `url:"a"`,C:d string `url:"c"`}
 	Decode() IError
+
+	// processing business
 	Process() IError
+
+	//defer set error
 	SetError(err IError)
+
+	//get real response
 	getResponse() Response
+
+	// Used to track distributed service link logs
+	// recommend set it in querystring
 	GetTrackId() string
+
+	// set trackId
 	SetTrackId(id string)
 }
 
