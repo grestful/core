@@ -1,10 +1,6 @@
 package core
 
 import (
-	"fmt"
-	"github.com/jinzhu/gorm"
-	"reflect"
-	"testing"
 	"time"
 )
 
@@ -80,41 +76,41 @@ return "",nil
 func (o Order) GetAttrTime(key string)(time.Time, error) {
 	return time.Now(),nil
 }
-func Test_OrmModel(t *testing.T) {
-
-
-	InitConfig("D:\\work\\pay2\\config\\config.ini")
-
-	m := &Model{
-		Value: nil,
-		Err:   Error{},
-		db:    nil,
-	}
-
-	m.db = GetDb("default")
-	result := m.List("status = ?", 1)
-	fmt.Println(result, "result is null")
-
-
-	//values := reflect.New(t)
-	//fmt.Println(values)
-	//values := reflect.ArrayOf(0, t)
-	//m.db.Table("order").Where("status = ?", "1").Scan(o)
-	//fff(m.db)
-}
-
-func fff(db *gorm.DB) {
-	o:=&Order{}
-	t := reflect.TypeOf(o)
-	values := reflect.SliceOf(t)
-	slice := reflect.MakeSlice(values, 0, 0)
-	s := reflect.New(slice.Type())
-	s.Elem().Set(slice)
-	fmt.Println(slice)
-	db.Table("order").Where("status = ?", "1").Scan(s.Interface())
-
-	fmt.Println("values", s.Elem().Len())
-	for i:=0; i<s.Elem().Len();i++ {
-		fmt.Println(s.Elem().Index(i).Interface().(*Order))
-	}
-}
+//func Test_OrmModel(t *testing.T) {
+//
+//
+//	InitConfig("D:\\work\\pay2\\config\\config.ini")
+//
+//	m := &Model{
+//		Value: nil,
+//		Err:   Error{},
+//		db:    nil,
+//	}
+//
+//	m.db = GetDb("default")
+//	result := m.List("status = ?", 1)
+//	fmt.Println(result, "result is null")
+//
+//
+//	//values := reflect.New(t)
+//	//fmt.Println(values)
+//	//values := reflect.ArrayOf(0, t)
+//	//m.db.Table("order").Where("status = ?", "1").Scan(o)
+//	//fff(m.db)
+//}
+//
+//func fff(db *gorm.DB) {
+//	o:=&Order{}
+//	t := reflect.TypeOf(o)
+//	values := reflect.SliceOf(t)
+//	slice := reflect.MakeSlice(values, 0, 0)
+//	s := reflect.New(slice.Type())
+//	s.Elem().Set(slice)
+//	fmt.Println(slice)
+//	db.Table("order").Where("status = ?", "1").Scan(s.Interface())
+//
+//	fmt.Println("values", s.Elem().Len())
+//	for i:=0; i<s.Elem().Len();i++ {
+//		fmt.Println(s.Elem().Index(i).Interface().(*Order))
+//	}
+//}

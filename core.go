@@ -30,6 +30,7 @@ func GetCore() *Core {
 	return gGore
 }
 
+
 // return instance gin core
 func GetGin() *gin.Engine {
 	return GetCore().Gin
@@ -40,6 +41,7 @@ func GetLog() log.Logger {
 	return GetCore().Log
 }
 
+// get db if exists
 func GetDb(name string) *gorm.DB {
 	if name == "" {
 		name = "default"
@@ -142,4 +144,3 @@ func (gG *Core) GetRedis(name string) *redis.Client {
 func (gG *Core) SetLoggerFormat(format string) {
 	gG.Log.GetDefaultFilter().SetFormat(format)
 }
-
