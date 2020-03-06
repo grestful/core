@@ -67,6 +67,27 @@ func initLog() {
 	}
 	switch typ {
 	case "file":
+		path, err := gGore.Config.GetValue("log", "path")
+		if path == "" || err != nil {
+			typ = "console"
+		}
+		level, err := gGore.Config.GetValue("log", "level")
+		if level == "" || err != nil {
+			level = "DEBUG"
+		}
+		log.SetFile(log.FileConfig{
+			Enable:   true,
+			Category: "file",
+			Level:    level,
+			Filename: path+"/cast.log",
+			Rotate:   true,
+			Daily:    true,
+			Sanitize: false,
+		})
+		writer := log.GetLogger("file")
+		log.SetDefaultLog(writer)
+		logConfig.Output = writer
+		GetCore().Gin.Use(gin.LoggerWithConfig(logConfig))
 	case "conn":
 		proto, err := gGore.Config.GetValue("log", "net")
 		if typ == "" || err != nil {
