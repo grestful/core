@@ -17,10 +17,20 @@ import (
 var gGore *Core
 var configOne sync.Once
 var contextPool *sync.Pool
-
+var res404 = Response{
+	Code: "404",
+	Msg:  "页面不存在",
+	Data: nil,
+}
+var resCodeMap = Response{
+	Code: "200",
+	Msg:  "错误对照码",
+	Data: DefaultCodeMapping,
+}
 func GetContext(g *gin.Context) *Context {
 	c := contextPool.Get().(*Context)
 	c.Context = g
+	c.Session = nil
 	return c
 }
 
@@ -32,6 +42,9 @@ func init() {
 		Db:     make(map[string]*gorm.DB),
 		Redis:  make(map[string]*redis.Client),
 	}
+	gGore.Gin.NoRoute(func(context *gin.Context) {
+		context.JSON(200, res404)
+	})
 	contextPool = &sync.Pool{New: func() interface{} {
 		return &Context{}
 	}}
@@ -60,7 +73,7 @@ func initLog() {
 		Output:    os.Stdout,
 		SkipPaths: nil,
 	}
-	log.Project = ServiceName
+
 	typ, err := gGore.Config.GetValue("log", "type")
 	if typ == "" || err != nil {
 		typ = "console"
@@ -135,6 +148,9 @@ func InitConfig(path string) {
 			panic(fmt.Sprintf("无法加载配置文件：%s \n", err))
 		}
 		ServiceName, _ = gGore.Config.GetValue("", "SERVICE_NAME")
+		gGore.Gin.GET("/"+ServiceName+"/code", func(context *gin.Context) {
+			context.JSON(200, DefaultCodeMapping)
+		})
 		initLog()
 
 		initDb()
