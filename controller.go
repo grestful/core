@@ -20,16 +20,16 @@ type Context struct {
 type ProcessFunc func(controller *Controller) IError
 type Controller struct {
 	//log trackId
-	TrackId    string //访问id
+	TrackId string //访问id
 	//the gin context
-	Ctx        *Context
+	Ctx *Context
 	//response code, default success
-	Code       string
+	Code string
 	//controller error
-	error      IError
+	error IError
 	//response data
-	Data       interface{} //output  from data raw data parse
-	Req        interface{} //input params
+	Data interface{} //output  from data raw data parse
+	Req  interface{} //input params
 
 	// middleware functions
 	Middleware []ProcessFunc
@@ -91,6 +91,25 @@ type Controller struct {
 //
 //	return errors.New("session type error")
 //}
+
+
+// get new Controller
+// demo:
+//		c := GetNewController(g, &UserInfo{UserId:1})
+//		c.ProcessFunc = func(con *Controller) IError {
+//			u := con.Req.(*Req)
+//			con.Data = u
+//		}
+func GetNewController(g *gin.Context, req interface{}) *Controller {
+	return &Controller{
+		Ctx: &Context{
+			Context: g,
+		},
+		Middleware: make([]ProcessFunc, 0),
+		Code:       SuccessCode,
+		Req:        req,
+	}
+}
 
 //run
 func RunProcess(controller IController, g *gin.Context) {
@@ -160,6 +179,9 @@ func runProcess(controller IController) (err IError) {
 }
 
 func (controller *Controller) Use(fn func(controller *Controller) IError) {
+	if controller.Middleware == nil {
+		controller.Middleware = make([]ProcessFunc, 1)
+	}
 	controller.Middleware = append(controller.Middleware, fn)
 }
 
