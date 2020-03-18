@@ -15,6 +15,12 @@ func (err Error) Error() string {
 }
 
 func (err Error) GetMsg() string {
+	if err.Msg == "" {
+		err.Msg = DefaultCodeMapping.GetCodeInfo(err.GetCode())
+		if err.Msg == "" {
+			return "code:"+err.GetCode()
+		}
+	}
 	return err.Error()
 }
 

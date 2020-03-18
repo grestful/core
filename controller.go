@@ -241,7 +241,7 @@ func (controller *Controller) getResponse() Response {
 
 //set error
 func (controller *Controller) SetError(err IError) {
-	GetLog().Info("set error in %s,track_id: %s, err: %s\n", controller.Ctx.Context.Request.URL.Path, controller.TrackId, err.GetMsg())
+	logs.Info("set error in %s, track_id: %s, err: %s\n", controller.Ctx.Context.Request.URL.Path, controller.GetTrackId(), err.GetMsg())
 	controller.error = err
 	return
 }
