@@ -10,6 +10,7 @@ import (
 	"github.com/grestful/utils"
 	"github.com/jinzhu/gorm"
 	"os"
+	"runtime"
 	"sync"
 	"time"
 )
@@ -46,19 +47,26 @@ func init() {
 	gGore.Gin.NoRoute(func(context *gin.Context) {
 		context.JSON(200, res404)
 	})
+	gGore.Gin.GET("/codes", func(context *gin.Context) {
+		context.JSON(200, res404)
+	})
 	contextPool = &sync.Pool{New: func() interface{} {
 		return &Context{}
 	}}
 }
 
 func initLog() {
-	log.Project = ServiceName
 	logConfig := gin.LoggerConfig{
 		Formatter: gin.LogFormatter(func(param gin.LogFormatterParams) string {
+			_, f, l, ok := runtime.Caller(2)
+			source := ""
+			if ok {
+				source = f + ":" + utils.Int2String(l)
+			}
 			lg := &log.LogRecord{
 				Level:   1,
 				Created: param.TimeStamp,
-				Source:  "",
+				Source: source,
 				Message: fmt.Sprintf("ip: %s, method: %s, path: %s, code: %d, agent: %s, error %s",
 					param.ClientIP,
 					param.Method,
@@ -68,7 +76,6 @@ func initLog() {
 					param.ErrorMessage),
 				Category: "default",
 			}
-			// fmt.Fprintln(os.Stdout, log.FormatLogRecord(log.FORMAT, lg))
 			return log.FormatLogRecord(log.FORMAT, lg)
 		}),
 		Output:    os.Stdout,
