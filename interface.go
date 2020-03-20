@@ -53,13 +53,13 @@ type ICache interface {
 	GetValue(key string) (string, error)
 
 	SetValue(key string, val interface{}, ex time.Duration) error
-	SetList(key string,  val... interface{}) error
+	SetList(key string, val ...interface{}) error
 	SetString(key, val string, ex time.Duration) error
-	SetMap(key string, m map[string]string, ex time.Duration)error
+	SetMap(key string, m map[string]string, ex time.Duration) error
 	SetBytes(key string, b []byte, ex time.Duration) error
 	Expire(key string, ex time.Duration)
 
-	Command(args... string) error
+	Command(args ...string) error
 }
 
 type IModel interface {
@@ -78,7 +78,6 @@ type IModel interface {
 	GetName() string
 }
 
-
 type IGetterSetter interface {
 	GetAttribute(key string) interface{}
 	SetAttribute(key string, value interface{}) bool
@@ -86,15 +85,15 @@ type IGetterSetter interface {
 	GetAttributes() map[string]interface{}
 
 	GetAttrInt(key string) (int, error)
-	GetAttrInt64(key string)(int64, error)
+	GetAttrInt64(key string) (int64, error)
 	GetAttrFloat(key string) (float32, error)
-	GetAttrFloat64(key string)(float64, error)
+	GetAttrFloat64(key string) (float64, error)
 	GetAttrUInt(key string) (uint, error)
-	GetAttrUInt64(key string)(uint64, error)
+	GetAttrUInt64(key string) (uint64, error)
 	GetAttrBool(key string) (bool, error)
-	GetAttrString(key string)(string, error)
+	GetAttrString(key string) (string, error)
 
-	GetAttrTime(key string)(time.Time, error)
+	GetAttrTime(key string) (time.Time, error)
 }
 
 type IModelStruct interface {
@@ -102,7 +101,5 @@ type IModelStruct interface {
 	GetKeyName() string
 }
 
-
 type IRouter interface {
-
 }

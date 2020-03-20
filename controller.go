@@ -92,7 +92,6 @@ type Controller struct {
 //	return errors.New("session type error")
 //}
 
-
 // get new Controller
 // demo:
 //		c := GetNewController(g, &UserInfo{UserId:1})

@@ -10,6 +10,7 @@ import (
 )
 
 var ServiceName string
+
 type Core struct {
 	Gin         *gin.Engine
 	Log         log.Logger
@@ -21,15 +22,14 @@ type Core struct {
 }
 
 // return instance config
-func GetConfig() *goconfig.ConfigFile  {
-	return  GetCore().Config
+func GetConfig() *goconfig.ConfigFile {
+	return GetCore().Config
 }
 
 // return instance
 func GetCore() *Core {
 	return gGore
 }
-
 
 // return instance gin core
 func GetGin() *gin.Engine {

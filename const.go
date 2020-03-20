@@ -1,6 +1,6 @@
 package core
 
-const  (
+const (
 	SessionTypeRedis = "redis"
 	SessionTypeFile  = "file"
 )

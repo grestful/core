@@ -4,9 +4,9 @@ import (
 	"time"
 )
 
-type My struct{
+type My struct {
 	Name string
-	Id int
+	Id   int
 }
 
 //func Test_ModelInterface(t *testing.T) {
@@ -33,49 +33,48 @@ type Order struct {
 	UpdateTime string  `gorm:"column:update_time;type:datetime;default:CURRENT_TIMESTAMP" json:"update_time"`
 }
 
-
-func (o Order) GetAttribute(key string) interface{}  {
+func (o Order) GetAttribute(key string) interface{} {
 	return nil
 }
-func (o Order) SetAttribute(key string, value interface{}) bool  {
+func (o Order) SetAttribute(key string, value interface{}) bool {
 	return false
 }
-func (o Order) SetAttributes(mp map[string]interface{}) bool  {
+func (o Order) SetAttributes(mp map[string]interface{}) bool {
 	return false
 }
-func (o Order) GetAttributes() map[string]interface{}  {
+func (o Order) GetAttributes() map[string]interface{} {
 	return nil
 }
-func (o Order) GetAttrInt(key string) (int, error){
+func (o Order) GetAttrInt(key string) (int, error) {
 	return 0, nil
 }
-func (o Order) GetAttrInt64(key string)(int64, error)  {
+func (o Order) GetAttrInt64(key string) (int64, error) {
 	return 0, nil
 }
 func (o Order) GetAttrFloat(key string) (float32, error) {
 	return 0, nil
 }
-func (o Order) GetAttrFloat64(key string) (float64, error)  {
+func (o Order) GetAttrFloat64(key string) (float64, error) {
 	return 0, nil
 }
 
 func (o Order) GetAttrUInt(key string) (uint, error) {
 	return 0, nil
 }
-func (o Order) GetAttrUInt64(key string)(uint64, error) {
+func (o Order) GetAttrUInt64(key string) (uint64, error) {
 	return 0, nil
 }
 
-
 func (o Order) GetAttrBool(key string) (bool, error) {
-return false,nil
+	return false, nil
 }
-func (o Order) GetAttrString(key string)(string, error) {
-return "",nil
+func (o Order) GetAttrString(key string) (string, error) {
+	return "", nil
 }
-func (o Order) GetAttrTime(key string)(time.Time, error) {
-	return time.Now(),nil
+func (o Order) GetAttrTime(key string) (time.Time, error) {
+	return time.Now(), nil
 }
+
 //func Test_OrmModel(t *testing.T) {
 //
 //

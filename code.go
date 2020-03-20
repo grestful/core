@@ -20,18 +20,17 @@ const (
 	FailSecret      = "-4"
 	FailParamsError = "-5"
 	FailPostMax     = "-6"
-	FailInternal	= "400"
+	FailInternal    = "400"
 )
 
-
 var DefaultCodeMapping = CodeMapping{
-	FailCode:              "操作失败",
-	FailUnknownCode:       "未知接口",
-	FailJsonParse:         "JSON解析错误或者接口不存在",
-	FailThirdLogin:        "第三方登录异常",
-	FailSecret:            "加密参数错误",
-	SuccessCode:           "操作成功",
-	FailInternal:          "内部错误",
-	FailParamsError:       "参数不合法",
-	FailPostMax:           "数据超过限制的大小",
+	FailCode:        "操作失败",
+	FailUnknownCode: "未知接口",
+	FailJsonParse:   "JSON解析错误或者接口不存在",
+	FailThirdLogin:  "第三方登录异常",
+	FailSecret:      "加密参数错误",
+	SuccessCode:     "操作成功",
+	FailInternal:    "内部错误",
+	FailParamsError: "参数不合法",
+	FailPostMax:     "数据超过限制的大小",
 }

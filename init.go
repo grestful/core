@@ -27,6 +27,7 @@ var resCodeMap = Response{
 	Msg:  "错误对照码",
 	Data: DefaultCodeMapping,
 }
+
 func GetContext(g *gin.Context) *Context {
 	c := contextPool.Get().(*Context)
 	c.Context = g
@@ -92,7 +93,7 @@ func initLog() {
 			Enable:   true,
 			Category: "file",
 			Level:    level,
-			Filename: path+"/cast.log",
+			Filename: path + "/cast.log",
 			Rotate:   true,
 			Daily:    true,
 			Sanitize: false,

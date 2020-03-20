@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"net/http"
 )
+
 var ResponseDataNil = struct {
 }{}
+
 type Response struct {
 	Code string      `json:"retcode"`
 	Msg  string      `json:"desc"`
@@ -13,12 +15,12 @@ type Response struct {
 }
 
 func (res Response) GetBytes() []byte {
-	b,_ := json.Marshal(res)
+	b, _ := json.Marshal(res)
 	return b
 }
 
 func (res Response) GetString() string {
-	b,_ := json.Marshal(res)
+	b, _ := json.Marshal(res)
 	return string(b[:])
 }
 
