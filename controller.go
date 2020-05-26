@@ -1,6 +1,7 @@
 package core
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -199,7 +200,9 @@ func (controller *Controller) Decode() IError {
 				if len(bt) == 0 {
 					bt = []byte("{}")
 				}
-				if err := json.Unmarshal(bt, &controller.Req); err != nil {
+				d := json.NewDecoder(bytes.NewReader(bt))
+				d.UseNumber()
+				if err := d.Decode(&controller.Req); err != nil {
 					return NewErrorCode(FailJsonParse)
 				}
 			}
