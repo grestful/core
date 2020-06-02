@@ -105,12 +105,52 @@ func GetNewController(g *gin.Context, req interface{}) *Controller {
 		Ctx: &Context{
 			Context: g,
 		},
-		Middleware: make([]ProcessFunc, 0),
 		Code:       SuccessCode,
 		Req:        req,
 	}
 }
 
+
+//alias name, If run it, do not use RunProcess
+func RunWithRequest(req interface{}, g *gin.Context) {
+	ct := GetNewController(g, req)
+	c := GetContext(g)
+	var ierr IError
+	defer func() {
+		if x := recover(); x != nil {
+			logs.Error(" panic :", x)
+			ierr = Error{
+				Code: "500",
+				Msg:  "运行时内部错误",
+				Err:  x,
+			}
+		}
+		if ierr != nil {
+			ct.SetError(ierr)
+		}
+
+		var err error
+		c.Status(200)
+		c.Header("Content-Type", "application/json; charset=utf-8")
+		defer func() {
+			if err != nil {
+				errStr := fmt.Sprintf(`{"code":"%s","msg":"system error: %s","data":null}`, FailInternal, err.Error())
+				rStr(c, errStr)
+			}
+		}()
+
+		res := ct.getResponse()
+
+		rJson(c, res)
+	}()
+
+	if ierr = getTrackId(ct); ierr != nil {
+		return
+	}
+	if ierr = runProcess(ct); ierr != nil {
+		return
+	}
+}
 //run
 func RunProcess(controller IController, g *gin.Context) {
 	c := GetContext(g)
