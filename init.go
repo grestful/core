@@ -23,7 +23,7 @@ var res404 = Response{
 	Msg:  "页面不存在",
 	Data: nil,
 }
-var resCodeMap = Response{
+var resSuccess = Response{
 	Code: "200",
 	Msg:  "错误对照码",
 	Data: DefaultCodeMapping,
@@ -32,7 +32,6 @@ var resCodeMap = Response{
 func GetContext(g *gin.Context) *Context {
 	c := contextPool.Get().(*Context)
 	c.Context = g
-	c.Session = nil
 	return c
 }
 
@@ -48,7 +47,7 @@ func init() {
 		context.JSON(200, res404)
 	})
 	gGore.Gin.GET("/codes", func(context *gin.Context) {
-		context.JSON(200, res404)
+		context.JSON(200, resSuccess)
 	})
 	contextPool = &sync.Pool{New: func() interface{} {
 		return &Context{}
@@ -66,7 +65,7 @@ func initLog() {
 			lg := &log.LogRecord{
 				Level:   1,
 				Created: param.TimeStamp,
-				Source: source,
+				Source:  source,
 				Message: fmt.Sprintf("ip: %s, method: %s, path: %s, code: %d, agent: %s, error %s",
 					param.ClientIP,
 					param.Method,
@@ -165,15 +164,7 @@ func InitConfig(path string) {
 
 		initRedis()
 
-		initSessionType()
 	})
-}
-
-func initSessionType() {
-	cf, err := gGore.Config.GetValue("", "SESSION_TYPE")
-	if err == nil {
-		gGore.SessionType = cf
-	}
 }
 
 func initDb() {
