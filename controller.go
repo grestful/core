@@ -233,6 +233,8 @@ func (controller *Controller) Decode() IError {
 	case http.MethodPost:
 		fallthrough
 	case http.MethodPut:
+		fallthrough
+	case http.MethodDelete:
 		ct := controller.Ctx.Context.Request.Header.Get("Content-Type")
 		if strings.Contains(ct, "json") {
 			bt, err := controller.Ctx.GetRawData()
