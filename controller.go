@@ -206,7 +206,7 @@ func getTrackId(controller IController) IError {
 func runProcess(controller IController) (err IError) {
 	err = controller.Decode()
 	if err != nil {
-		controller.SetError(err)
+		//controller.SetError(err)
 		return
 	}
 
