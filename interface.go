@@ -25,7 +25,7 @@ type IController interface {
 	getResponse() Response
 
 	// Used to track distributed service link logs
-	// recommend set it in querystring
+	// recommend set it in query string
 	GetTrackId() string
 
 	// set trackId

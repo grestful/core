@@ -9,9 +9,9 @@ var ResponseDataNil = struct {
 }{}
 
 type Response struct {
-	Code string      `json:"retcode"`
-	Msg  string      `json:"desc"`
-	Data interface{} `json:"biz"`
+	Code string      `json:"code"`
+	Msg  string      `json:"message"`
+	Data interface{} `json:"data"`
 }
 
 func (res Response) GetBytes() []byte {

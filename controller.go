@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/grestful/logs"
-	"github.com/grestful/session"
 	"github.com/grestful/utils"
 	"net/http"
 	"strings"
@@ -15,7 +14,6 @@ import (
 
 type Context struct {
 	*gin.Context
-	Session session.IUserSession
 }
 
 type ProcessFunc func(controller *Controller) IError
@@ -105,28 +103,27 @@ func GetNewController(g *gin.Context, req interface{}) *Controller {
 		Ctx: &Context{
 			Context: g,
 		},
-		Code:       SuccessCode,
-		Req:        req,
+		Code: SuccessCode,
+		Req:  req,
 	}
 }
-
 
 //alias name, If run it, do not use RunProcess
 func RunWithRequest(req interface{}, g *gin.Context) {
 	ct := GetNewController(g, req)
 	c := GetContext(g)
-	var ierr IError
+	var e IError
 	defer func() {
 		if x := recover(); x != nil {
 			logs.Error(" panic :", x)
-			ierr = Error{
+			e = Error{
 				Code: "500",
 				Msg:  "运行时内部错误",
 				Err:  x,
 			}
 		}
-		if ierr != nil {
-			ct.SetError(ierr)
+		if e != nil {
+			ct.SetError(e)
 		}
 
 		var err error
@@ -144,29 +141,30 @@ func RunWithRequest(req interface{}, g *gin.Context) {
 		rJson(c, res)
 	}()
 
-	if ierr = getTrackId(ct); ierr != nil {
+	if e = getTrackId(ct); e != nil {
 		return
 	}
-	if ierr = runProcess(ct); ierr != nil {
+	if e = runProcess(ct); e != nil {
 		return
 	}
 }
+
 //run
 func RunProcess(controller IController, g *gin.Context) {
 	c := GetContext(g)
 	controller.SetContext(c)
-	var ierr IError
+	var e IError
 	defer func() {
 		if x := recover(); x != nil {
 			logs.Error(" panic :", x)
-			ierr = Error{
+			e = Error{
 				Code: "500",
 				Msg:  "运行时内部错误",
 				Err:  x,
 			}
 		}
-		if ierr != nil {
-			controller.SetError(ierr)
+		if e != nil {
+			controller.SetError(e)
 		}
 
 		var err error
@@ -184,10 +182,10 @@ func RunProcess(controller IController, g *gin.Context) {
 		rJson(c, res)
 	}()
 
-	if ierr = getTrackId(controller); ierr != nil {
+	if e = getTrackId(controller); e != nil {
 		return
 	}
-	if ierr = runProcess(controller); ierr != nil {
+	if e = runProcess(controller); e != nil {
 		return
 	}
 }
