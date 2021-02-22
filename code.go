@@ -11,6 +11,10 @@ func (cm CodeMapping) GetCodeInfo(code string) string {
 	return ""
 }
 
+func (cm CodeMapping) AddCodeInfo(code, msg string) {
+	cm[code] = msg
+}
+
 const (
 	SuccessCode     = "000000"
 	FailCode        = "500"

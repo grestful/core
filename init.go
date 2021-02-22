@@ -99,7 +99,7 @@ func initLog() {
 			Enable:   true,
 			Category: "file",
 			Level:    level,
-			Filename: path + "/cast.log",
+			Filename: path + "/" + ServiceName + ".log",
 			Rotate:   true,
 			Daily:    true,
 			Sanitize: false,

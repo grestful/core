@@ -70,6 +70,14 @@ func getResponseWithCode(code string, data ...interface{}) Response {
 	return r
 }
 
+func ResponseStr(c *Context, str string) {
+	rStr(c, str)
+}
+
+func ResponseJson(c *Context, data interface{}) {
+	rJson(c, data)
+}
+
 func rStr(c *Context, str string) {
 	c.String(http.StatusOK, str)
 }
