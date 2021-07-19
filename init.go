@@ -107,7 +107,6 @@ func initLog() {
 		writer := log.GetLogger("file")
 		log.SetDefaultLog(writer)
 		logConfig.Output = writer
-		GetCore().Gin.Use(gin.LoggerWithConfig(logConfig))
 	case "conn":
 		proto, err := gGore.Config.GetValue("log", "net")
 		if typ == "" || err != nil {
@@ -132,7 +131,6 @@ func initLog() {
 		writer := log.GetLogger("socket")
 		logConfig.Output = writer
 		log.SetDefaultLog(writer)
-		GetCore().Gin.Use(gin.LoggerWithConfig(logConfig))
 	case "console":
 		fallthrough
 	default:
@@ -143,7 +141,6 @@ func initLog() {
 		writer := log.GetLogger("stdout")
 		logConfig.Output = writer
 		log.SetDefaultLog(writer)
-		GetCore().Gin.Use(gin.LoggerWithConfig(logConfig))
 	}
 }
 
